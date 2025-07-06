@@ -1,7 +1,7 @@
 """
 聊天历史记录管理器
 """
-
+import re
 from typing import List, Dict, Any, Optional, Tuple
 import traceback
 
@@ -189,32 +189,26 @@ class HistoryManager:
                     logger.debug(f"消息内容无法转换为字符串: {type(message)}")
                     return False
 
-            # 清理消息内容，去除前后空白
-            message = message.strip()
+            # 清理消息内容
+            cleaned_message = self._clean_message(message, sender_name)
 
             # 过滤空消息
-            if not message:
+            if not cleaned_message:
                 logger.debug(
                     f"跳过空消息: 会话ID={session_id_to_save}, 发送者={sender_name}"
                 )
-                return False
+                return True
 
-            # 日志详细记录收到的消息
-            logger.debug(
-                f"准备保存消息: 会话ID={session_id_to_save}, 发送者={sender_name}, 内容前30字符: {message[:30]}..."
-            )
-
-            # 插入数据
+            # 准备SQL插入语句
             insert_sql = """
-            INSERT INTO wordcloud_message_history 
-            (session_id, sender_id, sender_name, message, timestamp, is_group)
+            INSERT INTO wordcloud_message_history (session_id, sender_id, sender_name, message, timestamp, is_group)
             VALUES (?, ?, ?, ?, ?, ?)
             """
             params = (
                 session_id_to_save,
                 sender_id,
                 sender_name,
-                message,
+                cleaned_message,  # 使用清理后的消息
                 timestamp,
                 is_group,
             )
@@ -766,7 +760,7 @@ class HistoryManager:
 
     def extract_group_id_from_session(self, session_id: str) -> Optional[str]:
         """
-        从会话ID中提取群号
+        从会话ID提取群号
 
         Args:
             session_id: 会话ID
@@ -871,6 +865,36 @@ class HistoryManager:
         except Exception as e:
             logger.error(f"获取指定时间范围消息文本失败: {e}")
             return []
+
+    def _clean_message(self, message: str, sender_name: Optional[str] = None) -> str:
+        """
+        清理消息内容，移除不需要计入词云的元素
+
+        Args:
+            message: 原始消息
+            sender_name: 发送者昵称，用于移除群聊中的@某人
+
+        Returns:
+            清理后的消息
+        """
+        # 移除指令
+        if message.strip().startswith(('#', '/')):
+            return ""
+        
+        # 移除@某人的内容，包括可能的空格和换行
+        # 匹配 @昵称(QQ号) 或 @昵称
+        message = re.sub(r"@\s*\S+\s*\(\d+\)|@\s*\S+", "", message)
+
+        # 移除URL
+        message = re.sub(r"https?://[\w./?=&-]+", "", message)
+
+        # 移除其他可能不需要的内容，例如CQ码
+        message = re.sub(r"\[CQ:[^\]]+\]", "", message)
+
+        # 移除各种标点符号和特殊字符，只保留文本和基本空格
+        message = re.sub(r"[^\u4e00-\u9fa5a-zA-Z0-9]+", " ", message).strip()
+
+        return message
 
     def close(self):
         """

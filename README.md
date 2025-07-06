@@ -4,7 +4,7 @@
 
 <br>
 
-<div align="center">  <a href="#-更新日志"> <img src="https://img.shields.io/badge/version-v1.3.8--rev1-9644F4?style=for-the-badge" alt="Version"></a>
+<div align="center">  <a href="#-更新日志"> <img src="https://img.shields.io/badge/version-v1.3.9-9644F4?style=for-the-badge" alt="Version"></a>
   <a href="https://github.com/GEMILUXVII/astrbot_plugin_cloudrank/blob/main/LICENSE"> <img src="https://img.shields.io/badge/license-AGPL--3.0-E53935?style=for-the-badge" alt="License"></a>
   <a href="https://www.python.org/downloads/"> <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Version"></a>
   <a href="https://github.com/AstrBotDevs/AstrBot"> <img src="https://img.shields.io/badge/AstrBot-Compatible-00BFA5?style=for-the-badge&logo=robot&logoColor=white" alt="AstrBot Compatible"></a>
@@ -454,6 +454,12 @@ AstrBot/data/plugin_data/cloudrank/
   - **解决**: 确保消息格式完全匹配 `constant.py` 中定义的关键词，包括空格和标点符号，确保消息不以 `/` 开头，否则会被视为命令而非普通消息
 
 ## 🔄 更新日志
+
+#### **v1.3.9** (2025-07-06)
+
+**效果改进**:
+
+- 增强了消息清洗逻辑，能更精确地过滤指令、@消息、昵称等无意义内容，提高词云质量
 
 #### **v1.3.8-rev1** (2025-05-30)
 
