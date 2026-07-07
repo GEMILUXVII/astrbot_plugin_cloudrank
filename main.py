@@ -486,8 +486,6 @@ class WordCloudPlugin(Star):
                     )
 
                     # 检查本地时区
-                    import time
-
                     timezone_offset = -time.timezone // 3600  # 转换为小时
                     logger.info(
                         f"系统时区信息: UTC{'+' if timezone_offset >= 0 else ''}{timezone_offset}"
