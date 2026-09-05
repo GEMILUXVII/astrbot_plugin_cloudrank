@@ -14,7 +14,7 @@ from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent
 from astrbot.api.star import Context
 
-from ..utils import get_current_timestamp, get_day_start_end_timestamps
+from ..utils import get_current_timestamp, get_day_start_end_timestamps, extract_group_id_from_session
 
 
 class Base(DeclarativeBase):
@@ -630,7 +630,7 @@ class HistoryManager:
 
     async def extract_group_id_from_session(self, session_id: str) -> Optional[str]:
         """
-        从会话ID提取群号
+        从会话ID提取群号 (异步兼容接口，内部委托至 utils.extract_group_id_from_session 以保持兼容)
 
         Args:
             session_id: 会话ID
@@ -638,15 +638,7 @@ class HistoryManager:
         Returns:
             群号，如果不是群聊则返回None
         """
-        try:
-            # 会话ID格式通常为 "platform:GroupMessage:group_id"
-            parts = session_id.split(":")
-            if len(parts) >= 3 and "GroupMessage" in parts[1]:
-                return parts[2]
-            return None
-        except Exception as e:
-            logger.error(f"从会话ID提取群号失败: {e}")
-            return None
+        return extract_group_id_from_session(session_id)
 
     async def get_messages_by_timestamp_range(
         self,

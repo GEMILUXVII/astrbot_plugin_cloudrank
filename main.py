@@ -1174,7 +1174,7 @@ class WordCloudPlugin(Star):
                     )
                     for session_id in active_groups:
                         active_group_id = (
-                            self.history_manager.extract_group_id_from_session(
+                            extract_group_id_from_session(
                                 session_id
                             )
                         )
@@ -1321,8 +1321,17 @@ class WordCloudPlugin(Star):
 
             for session_id in active_sessions:
                 try:
+                    # 检查是否是群聊 (过滤好友私聊等非群聊会话)
+                    if (
+                        "group" not in session_id.lower()
+                        and "GroupMessage" not in session_id
+                        and "_group_" not in session_id
+                    ):
+                        logger.debug(f"会话 {session_id} 不是群聊，跳过自动生成")
+                        continue
+
                     # 如果是群聊，检查是否启用
-                    group_id = self.history_manager.extract_group_id_from_session(
+                    group_id = extract_group_id_from_session(
                         session_id
                     )
                     if group_id and not is_group_enabled(group_id, self.enabled_groups):
